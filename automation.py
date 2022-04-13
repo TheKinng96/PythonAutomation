@@ -4,6 +4,8 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 from datetime import datetime
 from model import user as user, website as web
 
@@ -17,10 +19,13 @@ def log(message):
   f.write(message)
   f.write('\n')
 
-def getButtonAndClick(title):
+def getButtonAndClick(title, isInput = 0):
   value = "//a[contains(@href, '/{}')]".format(title)
-  button = driver.find_element(By.XPATH, value=value)
-  button.send_keys(Keys.RETURN)
+  if isInput:
+    value = "//input[contains(@value, '{}')]".format(title)
+
+  button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, value)))
+  button.click()
 
 driver.get(web["url"])
 assert web["title"] in driver.title
@@ -40,5 +45,10 @@ message = "Logined successfully as " + user["email"]
 log(message)
 
 # Go to Campaign page
-driver.get(web["campaignPage"])
+getButtonAndClick(web['campaignPage'])
 log("Got in campaign page")
+
+# Filter page by FB
+passwordField = driver.find_element(By.XPATH, value='loginPassword')
+
+# getButtonAndClick(web['facebook'], 1)
